@@ -1,0 +1,26 @@
+{
+    "name": "discord-clan-bot-backend",
+    "version": "1.0.0",
+    "description": "Discord Clan Role Request Bot - Backend API & Bot",
+    "main": "src/index.js",
+    "scripts": {
+        "start": "node src/index.js",
+        "dev": "nodemon src/index.js",
+        "test": "jest"
+    },
+    "dependencies": {
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
+        "csv-parser": "^3.2.0",
+        "discord.js": "^14.14.1",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.0.3",
+        "multer": "^2.0.2",
+        "nodemailer": "^7.0.11"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.2"
+    }
+}
