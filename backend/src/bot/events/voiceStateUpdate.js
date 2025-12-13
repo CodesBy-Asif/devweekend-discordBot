@@ -25,10 +25,9 @@ async function handle(oldState, newState, bot) {
 
 async function handleJoin(state, member, guild) {
     try {
-        console.log(`[VoiceDebug] User ${member.user.tag} joined ${state.channelId}`);
         const config = await Config.findOne();
         if (!config || !config.joinToCreateChannelId || !config.tempVoiceCategoryId) {
-            console.log('[VoiceDebug] Config missing or incomplete');
+            //  console.log('[VoiceDebug] Config missing or incomplete');
             return;
         }
 
@@ -38,19 +37,11 @@ async function handleJoin(state, member, guild) {
             return;
         }
 
-        console.log('[VoiceDebug] User joined Join-to-Create channel');
-
-        // Get User's Clan Roles
-        // We need to fetch all clans to compare IDs
         const clans = await Clan.find({ enabled: true });
 
         const userClanRoles = clans.filter(clan => member.roles.cache.has(clan.roleId));
-        console.log(`[VoiceDebug] User has ${userClanRoles.length} clan roles`);
 
         if (userClanRoles.length === 0) {
-            console.log('[VoiceDebug] No clan roles found');
-            // No clan role, maybe kick or just ignore?
-            // For now, ignore. They just sit in the channel.
             return;
         }
 
@@ -58,11 +49,9 @@ async function handleJoin(state, member, guild) {
 
         if (userClanRoles.length === 1) {
             targetClan = userClanRoles[0];
-            console.log(`[VoiceDebug] Creating channel for single clan: ${targetClan.name}`);
             await createTempChannel(guild, member, targetClan, config.tempVoiceCategoryId);
         } else {
             // Multiple roles - Send DM
-            console.log('[VoiceDebug] Multiple clans, sending DM');
             await sendClanSelectionDM(member, userClanRoles, guild.id);
         }
 
@@ -101,7 +90,6 @@ async function handleLeave(state, member, guild) {
 
 async function createTempChannel(guild, member, clan, categoryId) {
     try {
-        console.log(`[VoiceDebug] createTempChannel for ${clan.name}`);
         const channelName = `${clan.name} Clan Meet`;
 
         // Check permissions
@@ -111,13 +99,11 @@ async function createTempChannel(guild, member, clan, categoryId) {
 
         const existing = guild.channels.cache.find(c => c.name === channelName && c.parentId === categoryId);
         if (existing) {
-            console.log('[VoiceDebug] Found existing channel, moving user');
             // Channel already exists, just move user
             await member.voice.setChannel(existing);
             return;
         }
 
-        console.log('[VoiceDebug] Creating new channel');
         const channel = await guild.channels.create({
             name: channelName,
             type: ChannelType.GuildVoice,
@@ -138,17 +124,10 @@ async function createTempChannel(guild, member, clan, categoryId) {
             ]
         });
 
-        console.log(`[VoiceDebug] Channel created: ${channel.id}`);
 
         // Only move member if they are already in a voice channel
         if (member.voice.channel) {
-            console.log('[VoiceDebug] Moving user to new channel');
             await member.voice.setChannel(channel);
-        } else {
-            console.log('[VoiceDebug] User not in voice, NOT moving');
-            // Optional: Notify user to join? 
-            // Since this might be triggered by a button interaction, the interaction handler can reply.
-            // But this specific function is just for creation logic.
         }
 
     } catch (error) {

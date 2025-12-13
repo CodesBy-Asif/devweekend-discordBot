@@ -179,7 +179,6 @@ async function handleEmailModal(interaction, bot) {
                 components: [row]
             });
 
-            console.log(`📧 OTP sent to ${email} for clan ${clan.name} (Request ID: ${request._id})`);
         } else {
             request.status = 'failed';
             await request.save();
@@ -305,7 +304,6 @@ async function handleOtpModal(interaction, bot) {
         });
 
         // Log verification
-        console.log(`✅ Verified: ${interaction.user.tag} → ${request.clanId?.name} (${request.menteeId?.email}) [Request: ${request._id}]`);
 
         // Send to log channel
         await logVerification(bot.client, interaction.guildId, {

@@ -49,12 +49,10 @@ async function updateConfig(data) {
                 const message = await channel.messages.fetch(config.requestMessageId);
                 if (message) {
                     await message.edit(buildMessagePayload(config));
-                    console.log('✅ Updated existing verification panel message');
                 }
             }
         } catch (error) {
             console.error('⚠️ Failed to auto-update Discord message:', error.message);
-            // Don't fail the request, just log it
         }
     }
 

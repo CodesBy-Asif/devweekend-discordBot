@@ -75,9 +75,7 @@ class EmailService {
             .replace(/{{email}}/g, email);
 
         if (!this.transporter) {
-            console.log(`📧 [DEV] Would send email to ${email}:`);
-            console.log(`   Subject: ${subject}`);
-            console.log(`   Code: ${code}`);
+
             return { success: true, dev: true };
         }
 
@@ -88,7 +86,6 @@ class EmailService {
                 subject,
                 html
             });
-            console.log(`📧 Email sent to ${email}`);
             return { success: true };
         } catch (error) {
             console.error('📧 Email send failed:', error);
@@ -114,7 +111,6 @@ class EmailService {
             </div>`;
 
         if (!this.transporter) {
-            console.log(`📧 [DEV] Would send ${approved ? 'approval' : 'rejection'} email to ${email}`);
             return { success: true, dev: true };
         }
 
