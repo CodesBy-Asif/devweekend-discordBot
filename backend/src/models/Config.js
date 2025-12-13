@@ -16,7 +16,7 @@ const configSchema = new mongoose.Schema({
         label: { type: String, default: 'Request Clan Role' },
         emoji: { type: String, default: '🔒' }
     },
-    emailFromName: { type: String, default: 'DW AI' },
+    emailFromName: { type: String, default: 'Dev Weekends' },
     emailSubject: { type: String, default: 'Your Verification Code: {{code}}' },
     emailTemplate: {
         type: String,

@@ -55,7 +55,7 @@ export default function DeploymentPanel({ config, onDeploy }) {
                         <div className="flex gap-3">
                             <select
                                 className="input-modern flex-1"
-                                value={channelId}
+                                value={channelId || deployedChannel?.id}
                                 defaultValue={deployedChannel?.id}
                                 onChange={e => setChannelId(e.target.value)}
                             >
