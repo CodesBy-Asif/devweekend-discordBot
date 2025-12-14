@@ -24,8 +24,10 @@ A comprehensive Discord bot solution for DevWeekend to automate mentee verificat
 - **Mentee Management**:
     - Bulk CSV Import with fuzzy matching.
     - Edit/Delete mentee records.
+    - **Role Synchronization**: Changing a verified user's clan automatically updates their role on Discord.
     - **Unlink Accounts**: Reset verification status to allow re-verification.
 - **Verification Requests**: View logs of all verification attempts.
+- **Audit Logging**: All admin actions are logged to a configured Discord channel.
 - **Analytics**: Visual breakdown of verified users.
 
 ## �️ Tech Stack

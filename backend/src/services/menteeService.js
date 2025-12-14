@@ -1,4 +1,5 @@
-const { Mentee, Clan, ActivityLog, Request } = require('../models');
+const { Mentee, Clan, Request } = require('../models');
+const logService = require('./logService');
 const bot = require('../bot');
 const { getGuildId } = require('../utils/guildId');
 const csv = require('csv-parser');
@@ -72,12 +73,7 @@ async function createMentee(data, adminUser) {
 
     await mentee.save();
 
-    await ActivityLog.create({
-        action: 'mentee_created',
-        adminId: adminUser?.id,
-        adminName: adminUser?.name || 'System',
-        details: `Created mentee: ${name} (${email})`
-    });
+    await logService.log('MENTEE_CREATED', adminUser, `Created mentee: ${name} (${email})`);
 
     return mentee;
 }
@@ -178,16 +174,11 @@ async function processCsvUpload(buffer, adminUser) {
 
     const result = await Mentee.bulkWrite(bulkOps);
 
-    await ActivityLog.create({
-        action: 'CSV_UPLOAD',
-        adminId: adminUser.id,
-        adminName: adminUser.username,
-        details: {
-            imported: results.length,
-            inserted: result.upsertedCount,
-            updated: result.modifiedCount,
-            skipped
-        }
+    await logService.log('CSV_UPLOAD', adminUser, {
+        imported: results.length,
+        inserted: result.upsertedCount,
+        updated: result.modifiedCount,
+        skipped
     });
 
     return {
@@ -201,13 +192,7 @@ async function processCsvUpload(buffer, adminUser) {
 async function deleteMentee(id, adminUser) {
     const mentee = await Mentee.findOneAndDelete({ _id: id });
     if (mentee) {
-        await ActivityLog.create({
-            action: 'MENTEE_DELETE',
-            adminId: adminUser.id,
-            adminName: adminUser.username,
-            targetId: mentee._id,
-            details: { name: mentee.name, email: mentee.email }
-        });
+        await logService.log('MENTEE_DELETE', adminUser, { name: mentee.name, email: mentee.email });
     }
     return mentee;
 }
@@ -227,16 +212,11 @@ async function updateMentee(id, updates, adminUser) {
     );
 
     if (updates.assignedClan && oldMentee.assignedClan !== mentee.assignedClan) {
-        await ActivityLog.create({
-            action: 'MENTEE_UPDATE',
-            adminId: adminUser.id,
-            adminName: adminUser.username,
-            targetId: mentee._id,
-            details: {
-                field: 'assignedClan',
-                oldValue: oldMentee.assignedClan,
-                newValue: mentee.assignedClan
-            }
+        await logService.log('MENTEE_UPDATE', adminUser, {
+            target: mentee.email,
+            field: 'assignedClan',
+            oldValue: oldMentee.assignedClan,
+            newValue: mentee.assignedClan
         });
     }
 
@@ -246,12 +226,7 @@ async function updateMentee(id, updates, adminUser) {
 async function bulkDelete(ids, adminUser) {
     const result = await Mentee.deleteMany({ _id: { $in: ids } });
 
-    await ActivityLog.create({
-        action: 'MENTEE_BULK_DELETE',
-        adminId: adminUser.id,
-        adminName: adminUser.username,
-        details: { count: result.deletedCount, ids }
-    });
+    await logService.log('MENTEE_BULK_DELETE', adminUser, { count: result.deletedCount });
 
     return result.deletedCount;
 }
@@ -259,12 +234,7 @@ async function bulkDelete(ids, adminUser) {
 async function clearAll(adminUser) {
     const result = await Mentee.deleteMany({});
 
-    await ActivityLog.create({
-        action: 'MENTEE_BULK_DELETE',
-        adminId: adminUser.id,
-        adminName: adminUser.username,
-        details: { count: result.deletedCount, type: 'CLEAR_ALL' }
-    });
+    await logService.log('MENTEE_CLEAR_ALL', adminUser, { count: result.deletedCount });
 
     return result.deletedCount;
 }

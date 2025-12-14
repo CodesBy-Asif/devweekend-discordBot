@@ -1,4 +1,5 @@
-const { Request, Mentee, Clan, ActivityLog } = require('../models');
+const { Request, Mentee, Clan } = require('../models');
+const logService = require('./logService');
 const bot = require('../bot');
 const { getGuildId } = require('../utils/guildId');
 
@@ -53,13 +54,7 @@ async function approveRequest(request, clan, adminUser) {
 
         await member.send(`✅ **Congratulations!**\n\nYour request to join **${clan.name}** has been approved! 🎉\nYou have been given the clan role.`);
 
-        await ActivityLog.create({
-            action: 'REQUEST_APPROVE',
-            adminId: adminUser.id,
-            adminName: adminUser.username,
-            targetId: request._id,
-            details: { clan: clan.name, user: request.discordUsername }
-        });
+        await logService.log('REQUEST_APPROVE', adminUser, `Approved request for ${request.menteeId?.email}`);
 
     } catch (error) {
         console.error('Approval error:', error);
@@ -79,13 +74,7 @@ async function rejectRequest(request, adminUser) {
         const clanName = request.clanId?.name || 'Unknown Clan';
         await member.send(`❌ **Request Update**\n\nYour request to join **${clanName}** was declined by an administrator.`);
 
-        await ActivityLog.create({
-            action: 'REQUEST_REJECT',
-            adminId: adminUser.id,
-            adminName: adminUser.username,
-            targetId: request._id,
-            details: { clan: clanName, user: request.discordUsername }
-        });
+        await logService.log('REQUEST_REJECT', adminUser, `Rejected request for ${request.menteeId?.email}`);
 
     } catch (error) {
         console.error('Rejection error:', error);

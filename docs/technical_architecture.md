@@ -38,7 +38,9 @@ graph TD
     Bot -->|Events| Services
     API -->|CRUD| Services
     Services -->|Read/Write| DB
+    Services -->|Read/Write| DB
     Services -->|Send Emails| SMTP
+    Services -->|Log Actions| DiscordAPI
 ```
 
 ---
@@ -82,6 +84,7 @@ erDiagram
         ObjectId _id
         String joinToCreateChannelId
         String adminKey "Hash"
+        String logChannelId "Discord Channel ID"
     }
 ```
 
@@ -134,7 +137,7 @@ The logic for handling dynamic voice channel creation is handled in `voiceStateU
 
 ```mermaid
 flowchart TD
-    Start([User Joins Voice Channel]) --> CheckChannel{Is "Join to Create" Channel?}
+    Start([User Joins Voice Channel]) --> CheckChannel{"Is 'Join to Create' Channel?"}
     CheckChannel -- No --> End([Ignore])
     CheckChannel -- Yes --> FetchRoles[Fetch User Roles & Clams]
     

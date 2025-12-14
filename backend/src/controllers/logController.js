@@ -1,15 +1,8 @@
 const logService = require('../services/logService');
-const { Mentee, ActivityLog } = require('../models');
+const { Mentee } = require('../models');
 
 async function list(req, res) {
-    try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 20;
-        const result = await logService.listLogs(req.query, page, limit);
-        res.json(result);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res.json({ logs: [], pagination: { page: 1, pages: 1, total: 0 } });
 }
 
 async function analytics(req, res) {
@@ -53,9 +46,7 @@ async function analytics(req, res) {
             { $sort: { _id: 1 } }
         ]);
 
-        const recentActivity = await ActivityLog.find({})
-            .sort({ createdAt: -1 })
-            .limit(10);
+        const recentActivity = [];
 
         res.json({
             mentees: {

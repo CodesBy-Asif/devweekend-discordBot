@@ -52,6 +52,8 @@ class DiscordBot {
 
             // Initialize role group service with bot reference
             roleGroupService.setBot(this);
+            const logService = require('../services/logService');
+            logService.setBot(this);
 
             // Start sync service
             this.syncService = new SyncService(this);

@@ -1,4 +1,5 @@
-const { Clan, Mentee, Request, ActivityLog } = require('../models');
+const { Clan, Mentee, Request } = require('../models');
+const logService = require('./logService');
 const bot = require('../bot');
 const { getGuildId } = require('../utils/guildId');
 
@@ -23,13 +24,7 @@ async function createClan(data, adminUser) {
 
     await clan.save();
 
-    await ActivityLog.create({
-        action: 'CLAN_CREATE',
-        adminId: adminUser.id,
-        adminName: adminUser.username,
-        targetId: clan._id,
-        details: { name: clan.name, roleId: clan.roleId }
-    });
+    await logService.log('CLAN_CREATE', adminUser, `Created clan: ${clan.name}`);
 
     return clan;
 }
@@ -54,19 +49,9 @@ async function updateClan(id, data, adminUser) {
         );
     }
 
-    await ActivityLog.create({
-        action: 'CLAN_UPDATE',
-        adminId: adminUser.id,
-        adminName: adminUser.username,
-        targetId: clan._id,
-        details: {
-            name: clan.name,
-            changes: {
-                name: data.name && data.name !== oldValues.name ? { from: oldValues.name, to: data.name } : undefined,
-                roleId: data.roleId && data.roleId !== oldValues.roleId ? { from: oldValues.roleId, to: data.roleId } : undefined,
-                enabled: data.enabled !== undefined && data.enabled !== oldValues.enabled ? { from: oldValues.enabled, to: data.enabled } : undefined
-            }
-        }
+    await logService.log('CLAN_UPDATE', adminUser, {
+        name: clan.name,
+        changes: Object.keys(data).filter(k => k !== 'adminUser').join(', ')
     });
 
     return clan;
@@ -92,13 +77,7 @@ async function deleteClan(id, options, adminUser) {
 
     await Clan.findByIdAndDelete(id);
 
-    await ActivityLog.create({
-        action: 'CLAN_DELETE',
-        adminId: adminUser.id,
-        adminName: adminUser.username,
-        targetId: clan._id,
-        details: { name: clan.name, roleDeleted: options.deleteRole === 'true' }
-    });
+    await logService.log('CLAN_DELETE', adminUser, `Deleted clan: ${clan.name}`);
 
     return clan;
 }
@@ -162,17 +141,10 @@ async function mergeClans(sourceId, targetId, adminUser) {
     await Clan.findByIdAndDelete(sourceId);
 
     // 5. Log
-    await ActivityLog.create({
-        action: 'CLAN_MERGE',
-        adminId: adminUser.id,
-        adminName: adminUser.username,
-        targetId: targetClan._id,
-        details: {
-            source: sourceClan.name,
-            target: targetClan.name,
-            menteesMoved: menteeResult.modifiedCount,
-            requestsMoved: requestResult.modifiedCount
-        }
+    await logService.log('CLAN_MERGE', adminUser, {
+        source: sourceClan.name,
+        target: targetClan.name,
+        menteesMoved: menteeResult.modifiedCount
     });
 
     return { success: true, menteesMoved: menteeResult.modifiedCount };
